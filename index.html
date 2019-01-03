@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <title>WOZ-waarde verandering in kaart</title>
+
+  <!-- Open Graph Meta -->
+  <meta content="WOZ-waarde verandering in kaart" property="og:site_name">
+  <meta content="WOZ-waarde verandering in kaart" property="og:title">
+  <meta content="website" property="og:type">
+  <meta content="WOZ ()" property="og:description">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png" />
+
+  <!-- Stylesheet -->
+  <link href="/css/style.css" rel="stylesheet">
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+  <script src='/js/ga.js'></script>
+</head>
+
+<body class="full">
+  <div id='map'></div>
+  <div class='map-overlay' id='features'>
+    <div class='map-content'>
+      <h2>WOZ-waarde verandering</h2>
+      <div id='pd'>
+        <p>Beweeg over de kaart</p>
+      </div>
+    </div>
+  </div>
+  <div class='map-overlay' id='legend'></div>
+  <script src='/js/mapbox.js'></script>
+</body>
+
+</html>
