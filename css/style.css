@@ -4,11 +4,12 @@ body {
 }
 
 h2 {
-    font-size: 1.2em;
+  font-size: 1em;
 }
+
 h3 {
   font-size: 1em;
-  display: inline
+  display: inline;
 }
 
 h5 {
@@ -16,6 +17,11 @@ h5 {
   text-align: left;
 }
 
+#stat {
+  margin-top: 3px;
+  font-size: 0.7em;
+  text-align: left;
+}
 /**
 * Create a position for the map
 * on the page */
@@ -32,33 +38,47 @@ h5 {
 * on the page. */
 .map-overlay {
   position: absolute;
-  bottom: 0;
-  right: 0;
   background: rgba(255, 255, 255, 0.8);
-  margin-right: 20px;
+  margin-left: 20px;
   font-family: Arial, sans-serif;
   overflow: auto;
   border-radius: 3px;
+}
+
+#geocoder {
+  position: absolute;
+  z-index: 1;
+  width: 50%;
+  left: 50%;
+  margin-right: 20px;
+  top: 20px;
+}
+
+.mapboxgl-ctrl-geocoder {
+  min-width: 100%;
+}
+
+#features {
+  top: 0;
+  height: 100px;
+  margin-top: 20px;
+  width: 325px;
 }
 
 .map-content {
   margin: 10px;
 }
 
-#features {
-  top: 0;
-  height: 300px;
-  margin-top: 20px;
-  width: 300px;
-}
-
 #legend {
   padding: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   line-height: 18px;
-  height: 150px;
+  height: 100px;
   margin-bottom: 40px;
+  margin-right: 20px;
   width: 100px;
+  right: 0;
+  bottom:0;
 }
 
 .legend-key {

@@ -1,26 +1,74 @@
 // mapbox init
-mapboxgl.accessToken = 'pk.eyJ1IjoiZmF0aG9tc29uIiwiYSI6ImNqbnBzMGxvcDA4dHQzbGxrazZoMnY4a28ifQ.uH6tllpY9iBEowQOKaQWgA';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZmF0aG9tc29uIiwiYSI6ImNqcWk3eDk2NDBidHkzeG55cnM4bzk2aHEifQ.MjyUQwX9Yk9lJPM4UtQHMA';
+
+
 var map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/fathomson/cjqdphovkfsb42sn110ofe9fa',
+  style: 'mapbox://styles/fathomson/cjqi36oqw017a2smt6tkpho2l',
   center: [6.6, 53.2],
   zoom: 13.0
+});
+
+
+map.addControl(new mapboxgl.GeolocateControl({
+  positionOptions: {
+    enableHighAccuracy: true
+  },
+  trackUserLocation: true
+}));
+
+var geocoder = new MapboxGeocoder({
+  country: 'nl',
+  accessToken: mapboxgl.accessToken
+});
+document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+// Create a popup, but don't add it to the map yet.
+var popup = new mapboxgl.Popup({
+  closeButton: false
 });
 
 function propertyValue(p) {
   return p ? " - " + p : "";
 }
 
-function showOne(p1,p2){
-  return p2 ? propertyValue(p2) : propertyValue(p1) ;
+function showOne(p1, p2) {
+  return p2 ? propertyValue(p2) : propertyValue(p1);
 }
 
-function formatPrice(p){ //€
-  return  "€" + Math.round(p).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
+function getFinestAggregation(p, als) {
+  for (var al of als) {
+    if (p[al]) {
+      return {'al': al, 'v' :p[al]}
+    }
+  }
 }
 
-function formatPct(p){
-  return (p*100).toFixed(2) + "%";
+function formatPrice(p) { //€
+  return "€" + Math.round(p).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
+}
+
+function formatPct(p) {
+  return (p * 100).toFixed(2) + "%";
+}
+
+function getPopupText(p) {
+  var als = ['Postcode_6', 'Postcode_4', 'Wijk', 'Plaats', 'Gemeente', 'Provincie'];
+  var res = getFinestAggregation(p, als);
+  var popupText =  "<strong>" + res.al + ": </strong>" + res.v + "<br>" +
+  "<center><h2>" + formatPct(p.verandering) + "</h2></center>" +
+  "<strong>2017: </strong>" + formatPrice(p.mean2017) + "<br>" +
+  "<strong>2016: </strong>" + formatPrice(p.mean2016) + "<br>" +
+  "<strong>2015: </strong>" + formatPrice(p.mean2015) + "<br>" +
+  "<strong>Oppervlakte: </strong>" + Math.round(p.oppa) + "<br>" +
+  "<strong>Bouwjaar: </strong>" + Math.round(p.bja) + "<br>"
+
+  return popupText
+}
+
+function getHouseObjSelected(p){
+  return  'Huizen / WOZobjs [' + p.huizen + "\/" + p.wozobjs + ']'
+
 }
 
 map.on('load', function() {
@@ -63,38 +111,47 @@ map.on('load', function() {
       0.1, '#F89406',
       0.20, '#BD362F'
     ],
-    'fill-opacity': 0.4
+    'fill-opacity': [
+      "case",
+      [
+        "==",
+        ["get", "huizen"],
+        0
+      ],
+      0,
+      0.4
+    ]
   }
 
   var layers = [];
   layers.push({
-    'name': 'Provincie-sim',
+    'name': 'Provincie',
     'minzoom': 0,
-    'maxzoom': 9
+    'maxzoom': 8
   });
   layers.push({
     'name': 'Gemeente',
-    'minzoom': 9,
-    'maxzoom': 10
+    'minzoom': 8,
+    'maxzoom': 9
   });
   layers.push({
     'name': 'Plaats',
-    'minzoom': 10,
-    'maxzoom': 11
+    'minzoom': 9,
+    'maxzoom': 10.5
   });
   layers.push({
     'name': 'Wijk',
-    'minzoom': 11,
-    'maxzoom': 13
+    'minzoom': 10.5,
+    'maxzoom': 12
   });
   layers.push({
     'name': 'Postcode_4',
-    'minzoom': 13,
-    'maxzoom': 15
+    'minzoom': 12,
+    'maxzoom': 13
   });
   layers.push({
     'name': 'Postcode_6',
-    'minzoom': 15,
+    'minzoom': 13,
     'maxzoom': 23
   });
 
@@ -104,51 +161,55 @@ map.on('load', function() {
       'url': 'mapbox://fathomson.' + layer.name
     });
 
-    map.addLayer({
-      'id': 'wozw-' + layer.name,
-      'source': layer.name,
-      'source-layer': layer.name,
-      'minzoom': layer.minzoom,
-      'maxzoom': layer.maxzoom,
-      'type': 'fill',
-      'paint': fillColor
-    }, 'waterway');
+    // Hightlight effect on hover requires 2 almost identical layers?
+    for (var hl of ["", "hl"]) {
+      var layerProp = {
+        'id': 'wozw-' + layer.name + hl,
+        'source': layer.name,
+        'source-layer': layer.name,
+        'minzoom': layer.minzoom,
+        'maxzoom': layer.maxzoom,
+        'type': 'fill',
+        'paint': fillColor
+      }
+      if (hl === "hl") {
+        layerProp['filter'] = ["==", "mean2017", 0]
+      }
 
+      map.addLayer(layerProp, 'waterway');
+    }
   }
 
   //change info window on hover
   map.on('mousemove', function(e) {
-    var featureQuery = [];
+
+    var searchLayer = null;
     var zoom = map.getZoom();
     for (var layer of layers) {
       if (layer.minzoom < zoom && layer.maxzoom > zoom) {
-        featureQuery.push(
-          'wozw-' + layer.name
-        )
+        searchLayer = ['wozw-' + layer.name]
       }
     }
     var mouseOnObj = map.queryRenderedFeatures(e.point, {
-      layers: featureQuery
+      layers: searchLayer
     });
 
 
     if (mouseOnObj.length > 0) {
-
-      document.getElementById('pd').innerHTML =
-        "<h3>" + mouseOnObj[0].properties.Provincie +
-        propertyValue(mouseOnObj[0].properties.Gemeente) +
-        propertyValue(mouseOnObj[0].properties.Plaats) +
-        propertyValue(mouseOnObj[0].properties.Wijk) +
-        showOne(mouseOnObj[0].properties.Postcode_4, mouseOnObj[0].properties.Postcode_6) + "</h3>" +
-        "<p>" + formatPct(mouseOnObj[0].properties.verandering) + "</p>" +
-        "<p>2017: <strong>" + formatPrice(mouseOnObj[0].properties.mean2017) + "</strong><br>" +
-        "2016: <strong>" + formatPrice(mouseOnObj[0].properties.mean2016) + "</strong><br>" +
-        "2015: <strong>" + formatPrice(mouseOnObj[0].properties.mean2015) + "</strong><br>" +
-        "Oppervlakte: <strong>" + Math.round(mouseOnObj[0].properties.oppa) + "m2</strong><br>" +
-        "Bouwjaar: <strong>" + Math.round(mouseOnObj[0].properties.bja) + "</strong></p>" +
-        "Huizen/WOZobj: [" + mouseOnObj[0].properties.huizen + "\/" + mouseOnObj[0].properties.wozobjs  + "]";
-    } else {
-      document.getElementById('pd').innerHTML = '<p>Beweeg over de kaart</p>';
+      map.setFilter(searchLayer + 'hl', [ "all",['==',  "mean2016", mouseOnObj[0].properties.mean2016], ['==',  "mean2017", mouseOnObj[0].properties.mean2017]]);
+      document.getElementById('stat').innerHTML = getHouseObjSelected(mouseOnObj[0].properties)
+      popup.setLngLat(e.lngLat)
+        .setHTML(getPopupText(mouseOnObj[0].properties))
+        .addTo(map);
     }
   });
+
+  // Has t
+  for (var layer of layers) {
+    map.on('mouseleave', 'wozw-' + layer.name, function() {
+      popup.remove();
+    });
+  }
+
+
 });

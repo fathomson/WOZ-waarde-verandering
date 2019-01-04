@@ -20,22 +20,24 @@
   <!-- Stylesheet -->
   <link href="css/style.css" rel="stylesheet">
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
-
+  <link href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' rel='stylesheet' />
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
   <script src='js/ga.js'></script>
 </head>
 
-<body class="full">
+<body>
   <div id='map'></div>
-  <div class='map-overlay' id='features'>
+  <div id='geocoder'></div>
+  <div id='features' class='map-overlay'>
     <div class='map-content'>
-      <h2>WOZ-waarde verandering</h2>
-      <div id='pd'>
-        <p>Beweeg over de kaart</p>
-      </div>
+      <h2>WOZ-waarde verandering 2015 - 2017</h2>
+      Beweeg over de kaart
+      <div id='stat'></div>
     </div>
   </div>
-  <div class='map-overlay' id='legend'></div>
+  <div id='legend' class='map-overlay'></div>
+
   <script src='js/mapbox.js'></script>
 </body>
 
