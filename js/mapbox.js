@@ -39,7 +39,10 @@ function showOne(p1, p2) {
 function getFinestAggregation(p, als) {
   for (var al of als) {
     if (p[al]) {
-      return {'al': al, 'v' :p[al]}
+      return {
+        'al': al,
+        'v': p[al]
+      }
     }
   }
 }
@@ -55,19 +58,24 @@ function formatPct(p) {
 function getPopupText(p) {
   var als = ['Postcode_6', 'Postcode_4', 'Wijk', 'Plaats', 'Gemeente', 'Provincie'];
   var res = getFinestAggregation(p, als);
-  var popupText =  "<strong>" + res.al + ": </strong>" + res.v + "<br>" +
-  "<center><h2>" + formatPct(p.verandering) + "</h2></center>" +
-  "<strong>2017: </strong>" + formatPrice(p.mean2017) + "<br>" +
-  "<strong>2016: </strong>" + formatPrice(p.mean2016) + "<br>" +
-  "<strong>2015: </strong>" + formatPrice(p.mean2015) + "<br>" +
-  "<strong>Oppervlakte: </strong>" + Math.round(p.oppa) + "<br>" +
-  "<strong>Bouwjaar: </strong>" + Math.round(p.bja) + "<br>"
+  var popupText = "<strong>" + res.al + ": </strong>" + res.v + "<br>"
+
+  if (p.huizen > 0) {
+    popupText += "<center><h2>" + formatPct(p.verandering) + "</h2></center>" +
+      "<strong>2017: </strong>" + formatPrice(p.mean2017) + "<br>" +
+      "<strong>2016: </strong>" + formatPrice(p.mean2016) + "<br>" +
+      "<strong>2015: </strong>" + formatPrice(p.mean2015) + "<br>" +
+      "<strong>Oppervlakte: </strong>" + Math.round(p.oppa) + "<br>" +
+      "<strong>Bouwjaar: </strong>" + Math.round(p.bja) + "<br>"
+  } else {
+    popupText += "Onvoldoende data beschikbaar"
+  }
 
   return popupText
 }
 
-function getHouseObjSelected(p){
-  return  'Huizen / WOZobjs [' + p.huizen + "\/" + p.wozobjs + ']'
+function getHouseObjSelected(p) {
+  return 'Huizen / WOZobjs [' + p.huizen + "\/" + p.wozobjs + ']'
 
 }
 
@@ -196,7 +204,9 @@ map.on('load', function() {
 
 
     if (mouseOnObj.length > 0) {
-      map.setFilter(searchLayer + 'hl', [ "all",['==',  "mean2016", mouseOnObj[0].properties.mean2016], ['==',  "mean2017", mouseOnObj[0].properties.mean2017]]);
+      map.setFilter(searchLayer + 'hl', ["all", ['==', "mean2016", mouseOnObj[0].properties.mean2016],
+        ['==', "mean2017", mouseOnObj[0].properties.mean2017]
+      ]);
       document.getElementById('stat').innerHTML = getHouseObjSelected(mouseOnObj[0].properties)
       popup.setLngLat(e.lngLat)
         .setHTML(getPopupText(mouseOnObj[0].properties))
