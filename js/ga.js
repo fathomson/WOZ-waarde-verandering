@@ -3,5 +3,5 @@
  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-ga('create', '{{ site.google_analytics }}', 'auto');
+ga('create', 'UA-131535472-1', 'auto');
 ga('send', 'pageview');
