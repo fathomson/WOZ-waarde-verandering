@@ -8,8 +8,9 @@ h2 {
 }
 
 h3 {
-  font-size: 1em;
+  font-size: 0.9em;
   display: inline;
+  font-weight: normal;
 }
 
 h5 {
